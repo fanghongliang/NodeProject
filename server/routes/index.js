@@ -97,14 +97,15 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+//不使用sequelize，直接sql 
 router.get('/user', (req, res, next) => {
-  const sql = 'select * from user'
+  let {id} = req.query
+  const sql = `select * from user where id = ${id}`
   db.query(sql, [], function(result, fields) {
     log('查询数据', result)
     let data = JSON.parse(JSON.stringify(result))
     if(data[0].address = '北京') {
       data[0].address = '上海'
-
     }
     data1 = req.requestTime
     res.json({
