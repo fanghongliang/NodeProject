@@ -4,7 +4,7 @@ let db = require('../db')
 var {Message, User} = require('../models/test.js')
 const jwt = require('jsonwebtoken')
 const setToken = require('../utils/middwares/jwt.js')
-const {log} = console
+const log = require('../utils/log.js')
 
 //登录
 router.post('/login', async (req, res, next) => {
@@ -15,7 +15,7 @@ router.post('/login', async (req, res, next) => {
       userName: userName
     }
   })
-  // console.log('查询结果返回：', JSON.stringify(data, null, 2))
+  // log('查询结果返回：', JSON.stringify(data, null, 2))
   if(!data) { 
     user.userName = userName
     data = await User.create(user)
@@ -40,10 +40,10 @@ router.post('/add_msg', (req, res, next) => {
     content: req.body.content,
   }
   Message.create(message).then(data => {
-    console.log('插入数据res', data)
+    log('插入数据res', data)
     res.json({data})
   }).catch(err => {
-    console.log('报错err', err)
+    log('报错err', err)
   }) 
 })
 
@@ -55,7 +55,7 @@ router.get('/getOne', (req, res, next) => {
 		})
   }
   Message.findAll().then(data => {
-    console.log('查找数据res', JSON.stringify(data, null, 2))
+    log('查找数据res', JSON.stringify(data, null, 2))
     res.json({
       errcode: 400,
       data
@@ -63,7 +63,34 @@ router.get('/getOne', (req, res, next) => {
   })
 })
 
+//删除一个用户
+router.get('/del_user', async (req, res, next) => {
+  let {userName} = req.query
+  log('删除用户userID, ',userName)
+  let result = await User.findOne({
+    where: {userName,}
+  })
+  if(!result) {
+    return res.json({msg: '不存在该用户'})
+  }
+  let data = await result.destroy()
+  log('删除用户返回', data.toJSON())
+  return res.json({msg: '删除成功', errcode: 0})
+})
 
+//更新用户信息
+router.post('/rich_user_info', async (req, res, next) => {
+  let data = req.body
+  log('接受参数data', data, typeof(data))
+  let result = await User.findOne({
+    where: {userName: data.userName}
+  })
+  Object.keys(result.toJSON()).map(item => {
+    data[item] ? result[item] = data[item] : ''
+  })
+  await result.save()
+  res.json({msg: 'succ', data: result})
+})
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -89,12 +116,12 @@ router.get('/user', (req, res, next) => {
 })
 
 function logOriginalUrl (req, res, next) {
-  console.log('Request URL:', req.originalUrl)
+  log('Request URL:', req.originalUrl)
   next()
 }
 
 function logMethod (req, res, next) {
-  console.log('Request Type:', req.method)
+  log('Request Type:', req.method)
   next()
 }
 
@@ -108,7 +135,7 @@ router.get('/email', (req, res, next) => {
 var logStuff = [logOriginalUrl, logMethod]
 router.get('/register', logStuff, (req, res, next) => {
   let params = req.query
-  console.log('post 参数', params)
+  log('post 参数', params)
   res.json({
     errcode: 0,
     data: {'user': '0'}
@@ -117,7 +144,7 @@ router.get('/register', logStuff, (req, res, next) => {
 
 router.get('/register', (req, res, next) => {
   let params = req.query
-  console.log('post 参数2', params)
+  log('post 参数2', params)
   res.json({
     errcode: 0,
     data: {'user': '1'}

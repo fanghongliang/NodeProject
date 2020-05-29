@@ -27,7 +27,7 @@ const User = sequelize.define('user', {
         type: Sequelize.INTEGER
     },
     address: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING(32)
     }
 })
 
