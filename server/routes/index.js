@@ -3,33 +3,25 @@ var router = express.Router();
 let db = require('../db')
 var {Message, User} = require('../models/test.js')
 const jwt = require('jsonwebtoken')
+const setToken = require('../utils/middwares/jwt.js')
 const {log} = console
 
 //登录
-router.get('/login', (req, res, next) => {
+router.post('/login', async (req, res, next) => {
   const user = {}
-  const user_id = ''
-  const user_data = ''
-  User.create(user).then(data => {
-    // user_id = data.id\
-    console.log('生成新用户id----------', data.id)
-    user_data = data
+  let {userName} = req.body
+  let data = await User.findOne({
+    where: {
+      userName: userName
+    }
   })
-  const token = 'Bearer ' + jwt.sign(
-    {
-      id: user_data.id,
-    },
-    'secret123456',
-    {
-      expiresIn: 3600 * 24 * 7
-    }
-  )
-  res.json({
-    errcode: 0,
-    data: {
-      data: user_data,
-      token
-    }
+  // console.log('查询结果返回：', JSON.stringify(data, null, 2))
+  if(!data) { 
+    user.userName = userName
+    data = await User.create(user)
+  }
+  setToken.setToken(data.id).then(token => {
+    return res.json({data: {data, token}})
   })
 })
 
@@ -57,8 +49,13 @@ router.post('/add_msg', (req, res, next) => {
 
 //查找某内容
 router.get('/getOne', (req, res, next) => {
+  if(!req.data) {
+    return res.json({
+			msg:'token invalid'
+		})
+  }
   Message.findAll().then(data => {
-    console.log('查找数据res', res)
+    console.log('查找数据res', JSON.stringify(data, null, 2))
     res.json({
       errcode: 400,
       data
