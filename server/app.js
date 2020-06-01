@@ -15,6 +15,17 @@ var app = express();
 // 托管静态文件
 // app.use('/static', express.static('public'))                          //相对路径
 app.use('/static', express.static(path.join(__dirname, 'public')))       //绝对路径
+// http://localhost:3000/static/images/index/person.png || http://localhost:3000/images/index/person.png
+
+//设置允许跨域访问该服务.
+app.all('*', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  //Access-Control-Allow-Headers ,可根据浏览器的F12查看,把对应的粘贴在这里就行
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Content-Type', 'application/json;charset=utf-8');
+  next();
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
