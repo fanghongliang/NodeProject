@@ -17,14 +17,20 @@ var app = express();
 app.use('/static', express.static(path.join(__dirname, 'public')))       //绝对路径
 // http://localhost:3000/static/images/index/person.png || http://localhost:3000/images/index/person.png
 
-//设置允许跨域访问该服务.
-app.all('*', function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  //Access-Control-Allow-Headers ,可根据浏览器的F12查看,把对应的粘贴在这里就行
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Content-Type', 'application/json;charset=utf-8');
-  next();
+app.use((req, res, next) => {
+  // 设置是否运行客户端设置 withCredentials
+  // 即在不同域名下发出的请求也可以携带 cookie
+  res.header("Access-Control-Allow-Credentials",true)
+  // 第二个参数表示允许跨域的域名，* 代表所有域名  
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, OPTIONS') // 允许的 http 请求的方法
+  // 允许前台获得的除 Cache-Control、Content-Language、Content-Type、Expires、Last-Modified、Pragma 这几张基本响应头之外的响应头
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With')
+  if (req.method == 'OPTIONS') {
+      res.sendStatus(200)
+  } else {
+      next()
+  }
 })
 
 // view engine setup
@@ -32,7 +38,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.set('json spaces', 2)
-app.use(logger('dev'));
+app.use(logger('short'));
 app.use(bodyParse.json()) 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -49,6 +55,12 @@ app.use(expressJwt({
 app.use('/', indexRouter);
 app.use('/v2', usersRouter);
 
+// 当token失效返回提示信息
+app.use(function(err, req, res, next) {
+	if (err.status == 401) {
+		return res.status(401).json({"msg": 'token失效'});
+	}
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -63,14 +75,9 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
+  res.json({msg: 500, msg: '服务器出错', err})
   res.render('error');
-});
-
-//当token失效返回提示信息
-app.use(function(err, req, res, next) {
-	if (err.status == 401) {
-		return res.status(401).send('token失效');
-	}
+  next()
 });
 
 module.exports = app;
