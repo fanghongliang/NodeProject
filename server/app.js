@@ -3,13 +3,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParse = require('body-parser');
-var logger = require('morgan');
 const expressJwt = require('express-jwt')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var verToken = require('./utils/middwares/jwt.js')
 let paramsVerify = require('./utils/middwares/paramsVerify.js')
+let {morgan, accessLogStream} = require('./utils/morgan.js')
 var app = express();
 
 // 托管静态文件
@@ -38,7 +38,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.set('json spaces', 2)
-app.use(logger('short'));
+app.use(morgan('joke'));                                   //服务器输入实时日志
+app.use(morgan('short', {stream: accessLogStream}));       //记录日志在文件中
 app.use(bodyParse.json()) 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
