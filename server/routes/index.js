@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 let db = require('../db')
-var {Message, User} = require('../models/test.js')
+var {Message, User, Home_config} = require('../models/test.js')
 const jwt = require('jsonwebtoken')
 const setToken = require('../utils/middwares/jwt.js')
 const log = require('../utils/log.js')
@@ -55,9 +55,9 @@ router.get('/getOne', (req, res, next) => {
 		})
   }
   Message.findAll().then(data => {
-    log('查找数据res', JSON.stringify(data, null, 2))
+    // log('查找数据res', JSON.stringify(data, null, 2))
     res.json({
-      errcode: 400,
+      errcode: 0,
       data
     })
   })
@@ -115,6 +115,49 @@ router.get('/user', (req, res, next) => {
     })
   })
 })
+
+router.post('/home_config', async (req, res, next) => {
+  let data = req.body
+  log('接受参数data', data, typeof(data))
+  log('/*//*/*/*', data.swiperList)
+  let result = await Home_config.findOne({
+    where: {id: 1}
+  })
+  Object.keys(result.toJSON()).map(item => {
+    data[item] ? result[item] = JSON.stringify(data[item])  : ''
+  })
+  await result.save()
+  Home_config.findOne({
+    where: {id: 1},
+    attributes: ['swiperList', 'iconList', 'recommendList', 'weekendList']
+  }).then(data => {
+    Object.keys(result.toJSON()).map(item => {
+      data[item] = JSON.parse(data[item])
+    })
+    res.json({msg: 'succ', data })
+  })
+  
+})
+
+router.get('/home_config', (req, res, next) => {
+  Home_config.findAll({
+    attributes: ['swiperList', 'iconList', 'recommendList', 'weekendList']
+  }).then(data => {
+    log('------------------3', JSON.stringify(data, null, 2), typeof(data))
+    log('--------------4', JSON.parseObject(data))
+    res.json({msg: 'succ', data})
+  })
+  // Object.keys(result.toJSON()).map(item => {
+  //   log('item-------------', item)
+  //   // data[item] ? result[item] = JSON.stringify(data[item])  : ''
+  //   item = JSON.parse(item)
+  // })
+  
+}) 
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Express' });
+});
 
 function logOriginalUrl (req, res, next) {
   log('Request URL:', req.originalUrl)
