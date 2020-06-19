@@ -50,7 +50,7 @@ app.use(paramsVerify.middArr)
 app.use(expressJwt({
   secret: 'secret123456'  // 签名的密钥 或 PublicKey
 }).unless({
-  path: ['/login',]  // 指定路径不经过 Token 解析
+  path: ['/login', '/']  // 指定路径不经过 Token 解析
 }))
 
 app.use('/', indexRouter);
