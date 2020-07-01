@@ -4,10 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParse = require('body-parser');
 const expressJwt = require('express-jwt')
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var verToken = require('./utils/middwares/jwt.js')
 let paramsVerify = require('./utils/middwares/paramsVerify.js')
 let {morgan, accessLogStream} = require('./utils/morgan.js')
 var app = express();
@@ -53,8 +49,7 @@ app.use(expressJwt({
   path: ['/api/login', '/']  // 指定路径不经过 Token 解析
 }))
 
-app.use('/api', indexRouter);
-app.use('/v2', usersRouter);
+app.use(require('./routes/core.js'));
 
 // 当token失效返回提示信息
 app.use(function(err, req, res, next) {
