@@ -1,5 +1,5 @@
 
-## 基于Express框架的后台REST-API实现  
+## 基于Express框架的后台REST-API实现以及服务器pm2部署
 * author: Fanghl  
 -----  
 后台使用mysql数据库，ORM采用sequelize实现，进行了 token 验证以及本地日志打印(morgin),针对浏览器环境，处理了跨域请求。对前端来的请求进行了基本的增删改查登录等接口，并且已将本地项目部署在云服务器上，使用 pm2 进行进程管理，nginx进行负载均衡处理。最终暴露对外的公网接口可以访问 160.13.4.75：3000/api/login (post),在login接口获得access_token， 将token放置在之后的请求头内即可访问余下的api。  
